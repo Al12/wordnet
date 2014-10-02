@@ -16,12 +16,12 @@ public class WordNet extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {		
 		if (args.length != 2) {
-	      System.err.printf("Usage: %s [generic options] <input> <output>\n",
-	          getClass().getSimpleName());
-	      ToolRunner.printGenericCommandUsage(System.err);
-	      return -1;
-	    }
-		Job job = new Job(getConf(), "Word net");
+		    System.err.printf("Usage: %s [generic options] <input> <output>\n",
+		        getClass().getSimpleName());
+		    ToolRunner.printGenericCommandUsage(System.err);
+		    return -1;
+	    }		
+		Job job = new Job(getConf(), "Word net");		
 		job.setJarByClass(getClass());
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));

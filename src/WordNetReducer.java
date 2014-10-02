@@ -7,8 +7,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /*public class MaxTemperatureReducer extends
@@ -28,9 +30,27 @@ public class WordNetReducer extends Reducer<Text, Text, Text, Text> {
 	@Override
 	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 		Set<String> neighbours = new HashSet<String>();
+		
+		byte[] row = Bytes.toBytes(key.toString());
+		//getting neighbours already in base
+		Get g = new Get(row);	
+		//g.addColumn(Bytes.toBytes("neighbours"), Bytes.toBytes("list"));
+		Result r = table.get(g);
+		if ( r != null) {
+			String oldValue = Bytes.toString(r.getValue(Bytes.toBytes("neighbours"), Bytes.toBytes("list")));			
+			if ( !oldValue.isEmpty() ) {				
+				//System.err.println(key.toString() + "_old: " + oldValue);
+				String[] oldNeighbours = oldValue.split(" ");
+				for ( String str : oldNeighbours ) { 
+					neighbours.add(str);
+				}			
+			}
+		}
+		
 		for (Text value : values) {
 			neighbours.add(value.toString());		
-		} 
+		}
+		
 		String neighboursText = "";
 		for ( String str : neighbours ) {
 			neighboursText = neighboursText.concat(str).concat(" ");
@@ -38,7 +58,7 @@ public class WordNetReducer extends Reducer<Text, Text, Text, Text> {
 		//ArrayWritable array = new ArrayWritable(Text.class);
 		//array.set(neighbours.toArray(new Text[neighbours.size()]));
 		context.write(key, new Text(neighboursText));
-		byte[] row = Bytes.toBytes(key.toString());
+		
 		Put p = new Put(row);
 		p.add(Bytes.toBytes("neighbours"), Bytes.toBytes("list"), Bytes.toBytes(neighboursText));
 		table.put(p);
