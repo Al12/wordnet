@@ -33,13 +33,12 @@ public class WordNetReducer extends Reducer<Text, Text, Text, Text> {
 		
 		byte[] row = Bytes.toBytes(key.toString());
 		//getting neighbours already in base
+		//no, Eclipse, it is spelled correctly, you just go and die with this American English of yours
 		Get g = new Get(row);	
-		//g.addColumn(Bytes.toBytes("neighbours"), Bytes.toBytes("list"));
 		Result r = table.get(g);
 		if ( r != null) {
 			String oldValue = Bytes.toString(r.getValue(Bytes.toBytes("neighbours"), Bytes.toBytes("list")));			
 			if ( !oldValue.isEmpty() ) {				
-				//System.err.println(key.toString() + "_old: " + oldValue);
 				String[] oldNeighbours = oldValue.split(" ");
 				for ( String str : oldNeighbours ) { 
 					neighbours.add(str);
@@ -55,9 +54,8 @@ public class WordNetReducer extends Reducer<Text, Text, Text, Text> {
 		for ( String str : neighbours ) {
 			neighboursText = neighboursText.concat(str).concat(" ");
 		}
-		//ArrayWritable array = new ArrayWritable(Text.class);
-		//array.set(neighbours.toArray(new Text[neighbours.size()]));
-		context.write(key, new Text(neighboursText));
+		
+		context.write(key, new Text(neighboursText));	//output is written for debugging
 		
 		Put p = new Put(row);
 		p.add(Bytes.toBytes("neighbours"), Bytes.toBytes("list"), Bytes.toBytes(neighboursText));

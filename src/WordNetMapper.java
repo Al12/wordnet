@@ -9,7 +9,9 @@ public class WordNetMapper extends Mapper<LongWritable, Text, Text, Text>{
 			throws IOException, InterruptedException {		
 		String paragraph = value.toString();
 		String[] sentences = paragraph.split("\\.");
+		//if '.' separator is configured there's no need in this split
 		for ( String sentence : sentences ) {
+			//removing special symbols garbage, split by \s 
 			String[] words = sentence.replaceAll("[^\\w\\s]", "").toLowerCase().split("\\s");			
 			Text keyText;
 			for ( String word : words ) {				
